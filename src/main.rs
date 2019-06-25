@@ -11,6 +11,28 @@ struct DenseMatrix{
     n_cols: usize
 }
 
+struct UnstructuredSparseMatrix{
+    row_major_data: std::collections::HashMap<usize, f32>,
+    n_rows: usize,
+    n_cols: usize
+}
+
+
+impl Matrix for UnstructuredSparseMatrix{
+    fn get_n_rows(self: &UnstructuredSparseMatrix)->usize{self.n_rows}
+    fn get_n_cols(self: &UnstructuredSparseMatrix)->usize{self.n_cols}
+    fn get(self: &UnstructuredSparseMatrix, row: usize, col: usize) -> f32{
+        assert!(row < self.get_n_rows(), col < self.get_n_cols());
+        self.row_major_data[&(row*self.get_n_cols() + col)]
+    }
+
+    fn set(self: &mut UnstructuredSparseMatrix, row: usize, col: usize, value: f32){
+        assert!(row < self.get_n_rows(), col < self.get_n_cols());
+        let index = row*self.get_n_cols() + col;
+        self.row_major_data.insert(index, value);
+    }
+}
+
 impl Matrix for DenseMatrix{
     fn get_n_rows(self: &DenseMatrix)->usize{self.n_rows}
     fn get_n_cols(self: &DenseMatrix)->usize{self.n_cols}
@@ -54,7 +76,6 @@ fn matmul(a: &Matrix, b: &Matrix) -> DenseMatrix {
 
 #[cfg(test)]
 mod tests {
-    // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
 
     #[test]
@@ -64,27 +85,10 @@ mod tests {
             n_cols:2, 
             n_rows:2
         };
-        let b = DenseMatrix{
-            row_major_data:vec![1., 2. ,3. ,4.],
-            n_cols:2, 
-            n_rows:2
-        };
-        let result = matmul(&a,&b);
+        let result = matmul(&a,&a);
         assert_eq!(result.row_major_data, vec![7.0, 10.0, 15.0, 22.0]);
     }
 }
 
 fn main() {
-    // let data_a = vec![1., 2. ,3. ,4.];
-    // let data_b = vec![1., 2. ,3. ,4.];
-    // let a = DenseMatrix{
-    //     row_major_data:data_a,
-    //     n_cols:2, 
-    //     n_rows:2
-    // };
-    // let b = DenseMatrix{
-    //     row_major_data:data_b,
-    //     n_cols:2, 
-    //     n_rows:2
-    // };
 }
